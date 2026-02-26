@@ -1,0 +1,5 @@
+{
+  "name": "EcoVillage Biogas Monitor",
+  "description": "An interactive animation of a community biogas system converting manure into electricity for village houses and the local grid.",
+  "requestFramePermissions": []
+}
