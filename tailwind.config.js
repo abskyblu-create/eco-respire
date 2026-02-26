@@ -1,12 +1,6 @@
 export default {
-  future: {
-    disableOpaqueColors: true,
-  },
-  experimental: {
-    optimizeUniversalDefaults: true,
-  },
-  //  THIS IS THE FIX
+  content: ["./index.html", "./src/**/*.{js,ts,jsx,tsx}"],
   tailwindcss: {
-    mode: 'aot', // disable oxide engine
+    mode: "aot", // disable oxide engine
   },
 };
