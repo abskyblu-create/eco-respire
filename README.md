@@ -38,12 +38,7 @@ The system addresses the air-pollution crisis in Cremona, Italy, where livestock
             │ (Biogas Production) │
             └─────────┬───────────┘
                       │
-                      ▼
-
-
-
-
-                      
+                      ▼     
             ┌─────────────────────┐
             │ Electricity Generator│
             │  (Renewable Energy) │
@@ -52,9 +47,13 @@ The system addresses the air-pollution crisis in Cremona, Italy, where livestock
         ┌─────────────┴─────────────┐
         ▼                           ▼
 ┌───────────────┐           ┌──────────────────┐
+
 │ Local Homes   │           │ National Grid    │
+
 │ Renewable     │           │ Energy Export    │
+
 │ Electricity   │           │ Revenue Stream   │
+
 └───────────────┘           └──────────────────┘
 
                       │
