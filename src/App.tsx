@@ -38,6 +38,7 @@ import {
   ArrowUp,
   ArrowLeft,
   ArrowRight,
+  ArrowDownLeft,
   Target,
   Clock,
   HelpCircle,
@@ -96,26 +97,76 @@ interface HistoryPoint {
 
 const IoTDisplay = ({ data }: { data: IoTData }) => (
   <motion.div 
-    initial={{ opacity: 0, scale: 0.9 }}
+    initial={{ opacity: 0, scale: 0.95 }}
     animate={{ opacity: 1, scale: 1 }}
-    className="bg-zinc-900/90 text-white p-3 rounded-2xl border border-white/10 shadow-2xl w-40 backdrop-blur-sm"
+    className="p-10 bg-zinc-950 rounded-[40px] border border-white/20 shadow-[0_40px_100px_rgba(0,0,0,0.7)] text-white w-[480px] backdrop-blur-3xl relative overflow-hidden"
   >
-    <div className="flex items-center gap-2 mb-2">
-      <Cpu className="text-emerald-400" size={12} />
-      <span className="text-[8px] font-bold uppercase tracking-widest text-zinc-400">IoT Sensor</span>
+    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500 opacity-40" />
+    <div className="flex items-center justify-between mb-10 border-b border-white/10 pb-8">
+      <div className="flex items-center gap-4">
+        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_15px_#10b981] animate-pulse" />
+        <span className="text-[13px] font-bold uppercase tracking-[0.4em] text-zinc-400">IOT CORE TELEMETRY v6.0</span>
+      </div>
+      <div className="flex items-center gap-3 px-4 py-2 bg-white/5 rounded-full border border-white/10">
+        <Activity size={16} className="text-emerald-400" />
+        <span className="text-[11px] font-mono font-bold text-emerald-400 tracking-widest">LIVE FEED</span>
+      </div>
     </div>
-    <div className="space-y-1.5">
-      <div className="flex justify-between items-center">
-        <span className="text-[8px] text-zinc-500 uppercase">Methane</span>
-        <span className="text-[10px] font-mono text-emerald-400">{data.gasLevel.toFixed(1)}%</span>
+    <div className="space-y-10">
+      <div className="group">
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-[12px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Methane Purity Index</span>
+          <span className="text-lg font-mono font-bold text-emerald-400">{(data.gasLevel * 0.6 + 30).toFixed(1)}%</span>
+        </div>
+        <div className="h-3 w-full bg-white/5 rounded-full overflow-hidden">
+          <motion.div 
+            className="h-full bg-emerald-500 shadow-[0_0_20px_#10b981]" 
+            animate={{ width: `${data.gasLevel}%` }}
+          />
+        </div>
       </div>
-      <div className="flex justify-between items-center">
-        <span className="text-[8px] text-zinc-500 uppercase">Load</span>
-        <span className="text-[10px] font-mono text-amber-400">{data.manureWeight.toFixed(0)}kg</span>
+      
+      <div className="grid grid-cols-2 gap-8">
+        <div className="p-6 bg-white/5 rounded-3xl border border-white/10 relative group hover:bg-white/10 transition-all">
+          <div className="absolute -top-3 -left-3 p-2 bg-amber-500 rounded-xl shadow-xl">
+            <Database size={14} className="text-zinc-900" />
+          </div>
+          <span className="text-[11px] font-bold text-zinc-500 uppercase block mb-3 tracking-widest">Biomass Weight</span>
+          <motion.span 
+            className="text-3xl font-mono font-bold text-amber-500"
+            key={data.manureWeight.toFixed(0)}
+            initial={{ opacity: 0.5, y: -5 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {data.manureWeight.toFixed(0)}
+            <span className="text-sm ml-1.5 opacity-50">kg</span>
+          </motion.span>
+        </div>
+        <div className="p-6 bg-white/5 rounded-3xl border border-white/10 relative group hover:bg-white/10 transition-all">
+          <div className="absolute -top-3 -left-3 p-2 bg-blue-500 rounded-xl shadow-xl">
+            <Zap size={14} className="text-zinc-900" />
+          </div>
+          <span className="text-[11px] font-bold text-zinc-500 uppercase block mb-3 tracking-widest">Energy Output</span>
+          <span className="text-3xl font-mono font-bold text-blue-400">
+            {data.electricityOutput.toFixed(1)}
+            <span className="text-sm ml-1.5 opacity-50">kW</span>
+          </span>
+        </div>
       </div>
-      <div className="flex justify-between items-center">
-        <span className="text-[8px] text-zinc-500 uppercase">Output</span>
-        <span className="text-[10px] font-mono text-blue-400">{data.electricityOutput.toFixed(1)}kW</span>
+
+      <div className="pt-8 border-t border-white/10">
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-indigo-500/20 rounded-xl">
+              <TrendingUp size={18} className="text-indigo-400" />
+            </div>
+            <span className="text-[12px] font-bold text-zinc-400 uppercase tracking-[0.2em]">Grid Export Rate</span>
+          </div>
+          <div className="text-right">
+            <span className="text-2xl font-mono font-bold text-indigo-400">+{data.gridExport.toFixed(1)}</span>
+            <span className="text-[11px] font-bold text-zinc-600 ml-2 uppercase tracking-widest">kW/h</span>
+          </div>
+        </div>
       </div>
     </div>
   </motion.div>
@@ -123,42 +174,52 @@ const IoTDisplay = ({ data }: { data: IoTData }) => (
 
 const DataCentre = () => (
   <motion.div 
-    className="bg-zinc-800 p-6 rounded-[32px] border border-white/10 shadow-xl flex flex-col items-center gap-3 w-48"
-    whileHover={{ scale: 1.05 }}
+    className="bg-zinc-950 p-8 rounded-[40px] border border-white/10 shadow-[0_30px_60px_rgba(0,0,0,0.4)] flex flex-col items-center gap-5 w-56 relative overflow-hidden group"
+    whileHover={{ y: -5, borderColor: 'rgba(59,130,246,0.3)' }}
   >
-    <div className="p-3 bg-blue-500/20 rounded-2xl text-blue-400">
-      <Server size={32} />
+    <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-600 opacity-50" />
+    <div className="p-5 bg-blue-500/10 rounded-[24px] text-blue-400 border border-blue-500/20 group-hover:scale-110 transition-transform duration-500">
+      <Server size={36} strokeWidth={1.5} />
     </div>
     <div className="text-center">
-      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-tighter">Intelligence Hub</div>
-      <div className="text-sm font-bold text-white">Data Centre</div>
+      <div className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] mb-1">Intelligence Hub</div>
+      <div className="text-base font-bold text-white tracking-tight">Data Centre</div>
     </div>
-    <div className="flex gap-1 mt-2">
-      {[1, 2, 3].map(i => (
+    <div className="flex gap-1.5 mt-2">
+      {[1, 2, 3, 4].map(i => (
         <motion.div 
           key={i}
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 1, repeat: Infinity, delay: i * 0.3 }}
-          className="w-1 h-3 bg-blue-400 rounded-full"
+          animate={{ 
+            height: [8, 16, 8],
+            opacity: [0.3, 1, 0.3] 
+          }}
+          transition={{ 
+            duration: 1.5, 
+            repeat: Infinity, 
+            delay: i * 0.2,
+            ease: "easeInOut"
+          }}
+          className="w-1 bg-blue-400 rounded-full"
         />
       ))}
     </div>
+    <div className="absolute bottom-3 text-[8px] font-mono text-zinc-600 uppercase tracking-widest">Status: Operational</div>
   </motion.div>
 );
 
 const GovernmentOffice = () => (
   <motion.div 
-    className="bg-white p-6 rounded-[32px] border border-zinc-200 shadow-xl flex flex-col items-center gap-3 w-48"
-    whileHover={{ scale: 1.05 }}
+    className="bg-white p-8 rounded-[40px] border border-zinc-200 shadow-[0_20px_40px_rgba(0,0,0,0.05)] flex flex-col items-center gap-5 w-56 group"
+    whileHover={{ y: -5, shadow: '0 30px 60px rgba(0,0,0,0.1)' }}
   >
-    <div className="p-3 bg-indigo-100 rounded-2xl text-indigo-600">
-      <Building2 size={32} />
+    <div className="p-5 bg-indigo-50 rounded-[24px] text-indigo-600 border border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500">
+      <Building2 size={36} strokeWidth={1.5} />
     </div>
     <div className="text-center">
-      <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Municipality</div>
-      <div className="text-sm font-bold text-zinc-800">Gov Office</div>
+      <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.3em] mb-1">Municipality</div>
+      <div className="text-base font-bold text-zinc-800 tracking-tight">Gov Office</div>
     </div>
-    <div className="mt-2 px-3 py-1 bg-indigo-50 rounded-full text-[8px] font-bold text-indigo-600 uppercase tracking-widest">
+    <div className="mt-2 px-4 py-1.5 bg-indigo-50 rounded-full text-[9px] font-bold text-indigo-600 uppercase tracking-widest border border-indigo-100">
       Policy Engine
     </div>
   </motion.div>
@@ -166,14 +227,14 @@ const GovernmentOffice = () => (
 
 const GroceryShop = () => (
   <motion.div 
-    className="bg-white p-6 rounded-[32px] border border-zinc-200 shadow-xl flex flex-col items-center gap-3 w-40"
-    whileHover={{ scale: 1.05 }}
+    className="bg-white p-6 rounded-[32px] border border-zinc-200 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col items-center gap-4 w-44 group"
+    whileHover={{ y: -5 }}
   >
-    <div className="p-3 bg-emerald-100 rounded-2xl text-emerald-600">
-      <ShoppingBag size={24} />
+    <div className="p-4 bg-emerald-50 rounded-[20px] text-emerald-600 border border-emerald-100 group-hover:bg-emerald-600 group-hover:text-white transition-all duration-500">
+      <ShoppingBag size={28} strokeWidth={1.5} />
     </div>
     <div className="text-center">
-      <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Local Market</div>
+      <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-1">Local Market</div>
       <div className="text-sm font-bold text-zinc-800">Grocery</div>
     </div>
   </motion.div>
@@ -181,19 +242,19 @@ const GroceryShop = () => (
 
 const AgriSupply = () => (
   <motion.div 
-    className="bg-white p-6 rounded-[32px] border border-zinc-200 shadow-xl flex flex-col items-center gap-3 w-40"
-    whileHover={{ scale: 1.05 }}
+    className="bg-white p-6 rounded-[32px] border border-zinc-200 shadow-[0_15px_30px_rgba(0,0,0,0.05)] flex flex-col items-center gap-4 w-44 group"
+    whileHover={{ y: -5 }}
   >
-    <div className="flex gap-2">
-      <div className="p-2 bg-amber-100 rounded-xl text-amber-600">
-        <Wheat size={20} />
+    <div className="flex gap-3">
+      <div className="p-3 bg-amber-50 rounded-xl text-amber-600 border border-amber-100 group-hover:bg-amber-500 group-hover:text-white transition-all duration-500">
+        <Wheat size={22} strokeWidth={1.5} />
       </div>
-      <div className="p-2 bg-zinc-100 rounded-xl text-zinc-600">
-        <Hammer size={20} />
+      <div className="p-3 bg-zinc-50 rounded-xl text-zinc-600 border border-zinc-100 group-hover:bg-zinc-800 group-hover:text-white transition-all duration-500">
+        <Hammer size={22} strokeWidth={1.5} />
       </div>
     </div>
     <div className="text-center">
-      <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">Supply Chain</div>
+      <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.2em] mb-1">Supply Chain</div>
       <div className="text-sm font-bold text-zinc-800">Agri Seed & Equip</div>
     </div>
   </motion.div>
@@ -206,7 +267,10 @@ const SystemFlowConnector = ({
   color = 'zinc', 
   duration = 2, 
   className = "",
-  labelOffset = -14
+  labelOffset = -18,
+  isActive = true,
+  zIndex = 10,
+  isEnhanced = false
 }: { 
   from: { x: number, y: number }, 
   to: { x: number, y: number }, 
@@ -214,7 +278,10 @@ const SystemFlowConnector = ({
   color?: 'amber' | 'blue' | 'indigo' | 'emerald' | 'zinc', 
   duration?: number,
   className?: string,
-  labelOffset?: number
+  labelOffset?: number,
+  isActive?: boolean,
+  zIndex?: number,
+  isEnhanced?: boolean
 }) => {
   const dx = to.x - from.x;
   const dy = to.y - from.y;
@@ -222,44 +289,85 @@ const SystemFlowConnector = ({
   const length = Math.sqrt(dx * dx + dy * dy);
 
   const colors = {
-    amber: { line: 'bg-amber-200/50', particle: 'bg-amber-500', shadow: 'shadow-[0_0_8px_rgba(245,158,11,0.5)]', text: 'text-amber-600' },
-    blue: { line: 'bg-blue-200/50', particle: 'bg-blue-500', shadow: 'shadow-[0_0_8px_rgba(59,130,246,0.5)]', text: 'text-blue-600' },
-    indigo: { line: 'bg-indigo-200/50', particle: 'bg-indigo-500', shadow: 'shadow-[0_0_8px_rgba(99,102,241,0.5)]', text: 'text-indigo-600' },
-    emerald: { line: 'bg-emerald-200/50', particle: 'bg-emerald-500', shadow: 'shadow-[0_0_8px_rgba(16,185,129,0.5)]', text: 'text-emerald-600' },
-    zinc: { line: 'bg-zinc-200/50', particle: 'bg-zinc-500', shadow: 'shadow-[0_0_8px_rgba(113,113,122,0.5)]', text: 'text-zinc-600' },
+    amber: { 
+      line: isEnhanced ? 'bg-amber-500/50' : 'bg-amber-500/20', 
+      particle: 'bg-amber-500', 
+      shadow: isEnhanced ? 'shadow-[0_0_20px_rgba(245,158,11,0.8)]' : 'shadow-[0_0_12px_rgba(245,158,11,0.6)]', 
+      text: 'text-amber-600', 
+      glow: isEnhanced ? 'rgba(245,158,11,0.2)' : 'rgba(245,158,11,0.1)' 
+    },
+    blue: { 
+      line: isEnhanced ? 'bg-blue-500/50' : 'bg-blue-500/20', 
+      particle: 'bg-blue-500', 
+      shadow: isEnhanced ? 'shadow-[0_0_20px_rgba(59,130,246,0.8)]' : 'shadow-[0_0_12px_rgba(59,130,246,0.6)]', 
+      text: 'text-blue-600', 
+      glow: isEnhanced ? 'rgba(59,130,246,0.2)' : 'rgba(59,130,246,0.1)' 
+    },
+    indigo: { 
+      line: isEnhanced ? 'bg-indigo-500/50' : 'bg-indigo-500/20', 
+      particle: 'bg-indigo-500', 
+      shadow: isEnhanced ? 'shadow-[0_0_20px_rgba(99,102,241,0.8)]' : 'shadow-[0_0_12px_rgba(99,102,241,0.6)]', 
+      text: 'text-indigo-600', 
+      glow: isEnhanced ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.1)' 
+    },
+    emerald: { 
+      line: isEnhanced ? 'bg-emerald-500/50' : 'bg-emerald-500/20', 
+      particle: 'bg-emerald-500', 
+      shadow: isEnhanced ? 'shadow-[0_0_20px_rgba(16,185,129,0.8)]' : 'shadow-[0_0_12px_rgba(16,185,129,0.6)]', 
+      text: 'text-emerald-600', 
+      glow: isEnhanced ? 'rgba(16,185,129,0.2)' : 'rgba(16,185,129,0.1)' 
+    },
+    zinc: { 
+      line: isEnhanced ? 'bg-zinc-500/50' : 'bg-zinc-500/20', 
+      particle: 'bg-zinc-500', 
+      shadow: isEnhanced ? 'shadow-[0_0_20px_rgba(113,113,122,0.8)]' : 'shadow-[0_0_12px_rgba(113,113,122,0.6)]', 
+      text: 'text-zinc-600', 
+      glow: isEnhanced ? 'rgba(113,113,122,0.2)' : 'rgba(113,113,122,0.1)' 
+    },
   };
 
   const c = colors[color];
 
   return (
     <div 
-      className={`absolute pointer-events-none z-10 ${className}`}
+      className={`absolute pointer-events-none ${className} transition-opacity duration-700 ${isActive ? 'opacity-100' : 'opacity-10'}`}
       style={{ 
         left: from.x, 
         top: from.y, 
         width: length, 
         transform: `rotate(${angle}deg)`,
-        transformOrigin: '0 50%'
+        transformOrigin: '0 50%',
+        zIndex: zIndex
       }}
     >
-      {/* The Line */}
-      <div className={`h-[1px] w-full ${c.line} relative`}>
+      {/* The Line with subtle glow */}
+      <div className={`${isEnhanced ? 'h-[6px]' : 'h-[3px]'} w-full ${c.line} relative rounded-full`}>
+        {/* Subtle background glow for the path */}
+        {isActive && (
+          <div 
+            className="absolute inset-0 blur-[6px] opacity-50"
+            style={{ backgroundColor: c.glow }}
+          />
+        )}
+
         {/* The Moving Particle */}
-        <motion.div 
-          className={`absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full ${c.particle} ${c.shadow}`}
-          animate={{ left: ["0%", "100%"] }}
-          transition={{ duration, repeat: Infinity, ease: "linear" }}
-        />
+        {isActive && (
+          <motion.div 
+            className={`absolute top-1/2 -translate-y-1/2 ${isEnhanced ? 'w-5 h-5' : 'w-3 h-3'} rounded-full ${c.particle} ${c.shadow} border border-white/50`}
+            animate={{ left: ["0%", "100%"] }}
+            transition={{ duration, repeat: Infinity, ease: "linear" }}
+          />
+        )}
         
         {/* The Label - Counter rotated to stay horizontal */}
         <div 
           className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap"
           style={{ 
-            top: `${labelOffset}px`,
+            top: `${isEnhanced ? labelOffset - 4 : labelOffset}px`,
             transform: `rotate(${-angle}deg)` 
           }}
         >
-          <span className={`text-[7px] font-bold uppercase tracking-tighter ${c.text} bg-white/95 px-1.5 py-0.5 rounded-sm border border-zinc-100 shadow-sm`}>
+          <span className={`text-[8px] font-bold uppercase tracking-widest ${c.text} bg-white/90 backdrop-blur-md px-2 py-0.5 rounded-full border border-zinc-100 shadow-sm`}>
             {label}
           </span>
         </div>
@@ -322,58 +430,82 @@ const Digester = ({ gasLevel, manureLevel }: { gasLevel: number, manureLevel: nu
   const thresholds = [25, 50, 75, 90];
   
   return (
-    <div className="relative w-32 h-48">
-      {/* Outer Container */}
-      <div className="absolute inset-0 border-4 border-zinc-700 rounded-t-[32px] rounded-b-lg overflow-hidden bg-zinc-800 shadow-inner">
+    <div className="relative w-40 h-64">
+      {/* Outer Container - Industrial Look */}
+      <div className="absolute inset-0 border-[6px] border-zinc-800 rounded-t-[48px] rounded-b-2xl overflow-hidden bg-zinc-900 shadow-[inset_0_10px_30px_rgba(0,0,0,0.8)]">
+        {/* Glass Reflection Effect */}
+        <div className="absolute inset-0 bg-gradient-to-r from-white/5 via-transparent to-black/20 z-20 pointer-events-none" />
+        
         {/* Threshold Markers */}
         {thresholds.map((t) => (
           <div 
             key={t}
-            className="absolute left-0 right-0 border-t border-zinc-600/30 z-10 flex items-center px-1"
+            className="absolute left-0 right-0 border-t border-white/5 z-30 flex items-center px-2"
             style={{ bottom: `${t}%` }}
           >
-            <span className="text-[6px] font-mono text-zinc-500 opacity-50">{t}%</span>
+            <span className="text-[7px] font-mono text-zinc-600 font-bold">{t}%</span>
             {manureLevel >= t && (
               <motion.div 
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="ml-auto w-1 h-1 bg-emerald-400 rounded-full shadow-[0_0_5px_#34d399]"
+                className="ml-auto w-1.5 h-1.5 bg-emerald-400 rounded-full shadow-[0_0_8px_#34d399]"
               />
             )}
           </div>
         ))}
 
-        {/* Manure Level */}
+        {/* Manure Level - Organic Texture */}
         <motion.div 
-          className="absolute bottom-0 left-0 right-0 bg-amber-900/80"
+          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-amber-950 to-amber-900"
           animate={{ height: `${manureLevel}%` }}
-          transition={{ type: 'spring', stiffness: 50 }}
+          transition={{ type: 'spring', stiffness: 40, damping: 15 }}
         >
-          <div className="absolute top-0 left-0 right-0 h-2 bg-amber-800/50 blur-sm" />
+          <div className="absolute top-0 left-0 right-0 h-4 bg-amber-800/30 blur-md" />
+          {/* Bubbles in manure */}
+          {[...Array(3)].map((_, i) => (
+            <motion.div
+              key={i}
+              className="absolute w-1 h-1 bg-amber-700/40 rounded-full"
+              animate={{
+                y: [0, -20],
+                opacity: [0, 0.5, 0],
+                x: [Math.random() * 100, Math.random() * 100]
+              }}
+              transition={{
+                duration: 3,
+                repeat: Infinity,
+                delay: i * 1
+              }}
+              style={{ bottom: `${Math.random() * 80}%`, left: `${Math.random() * 80}%` }}
+            />
+          ))}
         </motion.div>
         
-        {/* Gas Level (above manure) */}
+        {/* Gas Level (above manure) - Ethereal Glow */}
         <motion.div 
-          className="absolute left-0 right-0 bg-emerald-500/20"
+          className="absolute left-0 right-0 bg-emerald-500/10"
           animate={{ 
             bottom: `${manureLevel}%`,
             height: `${gasLevel}%` 
           }}
         >
           <div className="w-full h-full relative overflow-hidden">
-            {[...Array(5)].map((_, i) => (
+            <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/20 to-transparent" />
+            {[...Array(8)].map((_, i) => (
               <motion.div
                 key={i}
-                className="absolute w-2 h-2 bg-emerald-400/40 rounded-full"
+                className="absolute w-2.5 h-2.5 bg-emerald-400/30 rounded-full blur-[1px]"
                 animate={{
-                  y: [-20, -100],
-                  x: [Math.random() * 100, Math.random() * 100],
-                  opacity: [0, 1, 0]
+                  y: [20, -150],
+                  x: [Math.random() * 120, Math.random() * 120],
+                  opacity: [0, 0.8, 0],
+                  scale: [0.5, 1.2, 0.8]
                 }}
                 transition={{
-                  duration: 2 + Math.random() * 2,
+                  duration: 3 + Math.random() * 3,
                   repeat: Infinity,
-                  delay: i * 0.5
+                  delay: i * 0.4,
+                  ease: "easeOut"
                 }}
               />
             ))}
@@ -381,9 +513,16 @@ const Digester = ({ gasLevel, manureLevel }: { gasLevel: number, manureLevel: nu
         </motion.div>
       </div>
       
-      {/* IoT Sensor Tag */}
-      <div className="absolute -top-4 -right-4 bg-zinc-900 border border-zinc-700 p-1 rounded-lg shadow-lg">
-        <Database size={16} className="text-zinc-400" />
+      {/* External Pipes */}
+      <div className="absolute -left-4 top-1/2 -translate-y-1/2 w-4 h-12 bg-zinc-800 rounded-l-md border-y-2 border-l-2 border-zinc-700" />
+      <div className="absolute -right-4 top-1/4 w-4 h-8 bg-zinc-800 rounded-r-md border-y-2 border-r-2 border-zinc-700" />
+
+      {/* IoT Sensor Tag - Premium Look */}
+      <div className="absolute -top-6 -right-6 bg-zinc-950 border border-white/10 p-2 rounded-xl shadow-2xl z-40">
+        <div className="flex items-center gap-2">
+          <Database size={14} className="text-blue-400" />
+          <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+        </div>
       </div>
     </div>
   );
@@ -391,38 +530,48 @@ const Digester = ({ gasLevel, manureLevel }: { gasLevel: number, manureLevel: nu
 
 const VillageHouse = ({ id, isActive }: { id: number, isActive: boolean }) => (
   <div className="relative group">
-    <div className="w-32 h-24 bg-white rounded-lg border border-zinc-200 relative shadow-sm">
-      {/* Roof */}
-      <div className="absolute -top-8 left-0 right-0 h-8 bg-zinc-800 clip-path-triangle" 
-           style={{ clipPath: 'polygon(50% 0%, 0% 100%, 100% 100%)' }} />
+    <motion.div 
+      className="w-36 h-28 bg-white rounded-2xl border border-zinc-200 relative shadow-[0_10px_20px_rgba(0,0,0,0.03)] overflow-hidden"
+      whileHover={{ y: -4 }}
+    >
+      {/* Roof - Modern Architectural Style */}
+      <div className="absolute top-0 left-0 right-0 h-10 bg-zinc-800" 
+           style={{ clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)' }} />
       
-      {/* Windows */}
-      <div className="flex justify-around mt-8 px-4">
+      {/* Windows with Glow */}
+      <div className="flex justify-around mt-12 px-5">
         <motion.div 
-          className={`w-6 h-6 rounded-sm border border-zinc-100 ${isActive ? 'bg-yellow-200 shadow-[0_0_10px_rgba(253,224,71,0.5)]' : 'bg-zinc-100'}`}
-          animate={isActive ? { opacity: [0.7, 1, 0.7] } : {}}
+          className={`w-7 h-7 rounded-md border border-zinc-100 flex items-center justify-center ${isActive ? 'bg-yellow-100 shadow-[0_0_15px_rgba(253,224,71,0.6)]' : 'bg-zinc-50'}`}
+          animate={isActive ? { opacity: [0.8, 1, 0.8] } : {}}
           transition={{ duration: 2, repeat: Infinity }}
-        />
+        >
+          {isActive && <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full blur-[1px]" />}
+        </motion.div>
         <motion.div 
-          className={`w-6 h-6 rounded-sm border border-zinc-100 ${isActive ? 'bg-yellow-200 shadow-[0_0_10px_rgba(253,224,71,0.5)]' : 'bg-zinc-100'}`}
-          animate={isActive ? { opacity: [0.7, 1, 0.7] } : {}}
+          className={`w-7 h-7 rounded-md border border-zinc-100 flex items-center justify-center ${isActive ? 'bg-yellow-100 shadow-[0_0_15px_rgba(253,224,71,0.6)]' : 'bg-zinc-50'}`}
+          animate={isActive ? { opacity: [0.8, 1, 0.8] } : {}}
           transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-        />
+        >
+          {isActive && <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full blur-[1px]" />}
+        </motion.div>
       </div>
       
+      {/* Door */}
+      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-6 h-8 bg-zinc-100 rounded-t-sm border-x border-t border-zinc-200" />
+
       {/* Label */}
-      <div className="absolute -bottom-6 left-0 right-0 text-center text-[10px] font-bold text-zinc-400 uppercase tracking-tighter">
-        House {id}
+      <div className="absolute bottom-1 right-2 text-[8px] font-bold text-zinc-300 uppercase tracking-widest">
+        H-{id.toString().padStart(2, '0')}
       </div>
-    </div>
+    </motion.div>
     
-    {/* Power Line Connection */}
+    {/* Power Line Connection - Animated Energy Flow */}
     {isActive && (
-      <div className="absolute -left-12 top-1/2 w-12 h-[2px] bg-yellow-400/50">
+      <div className="absolute -left-14 top-1/2 w-14 h-[1px] bg-yellow-400/30">
         <motion.div 
-          className="w-2 h-2 bg-yellow-400 rounded-full absolute top-1/2 -translate-y-1/2"
-          animate={{ x: [0, 48] }}
-          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-2 h-2 bg-yellow-400 rounded-full absolute top-1/2 -translate-y-1/2 shadow-[0_0_8px_#facc15]"
+          animate={{ x: [0, 56] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "linear" }}
         />
       </div>
     )}
@@ -622,7 +771,7 @@ const AirQualityReport = () => (
     <div className="p-8 bg-emerald-900 text-white rounded-[40px] shadow-2xl">
       <div className="flex items-center gap-4 mb-6">
         <ShieldCheck size={32} className="text-emerald-400" />
-        <h3 className="text-2xl font-serif italic">Unattackable Summary</h3>
+        <h3 className="text-2xl font-serif italic">Summary</h3>
       </div>
       <p className="text-emerald-100 leading-relaxed italic">
         "Cremona is among the worst cities in Europe for PM2.5, ranking 370th out of 372. While it may technically meet EU annual limits at times, its levels are approximately 4.5x higher than WHO health guidelines. The Po Valley geography traps pollutants from transport, heating, and agriculture, creating a structural hotspot that has already led to EU Court condemnations for Italy. Even when legally compliant, the health risk remains significantly higher than in major European capitals like Paris or Berlin."
@@ -1863,23 +2012,42 @@ const TeamReviewView = () => {
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<'solution' | 'statistics' | 'cremona' | 'systems' | 'strategy' | 'team' | 'review'>('solution');
-  const [manureWeight, setManureWeight] = useState(450);
   const [gasLevel, setGasLevel] = useState(30);
   const [isFeeding, setIsFeeding] = useState(false);
   const [electricityOutput, setElectricityOutput] = useState(0);
-  const [tokens, setTokens] = useState(0);
+  const [tokens, setTokens] = useState(1250);
+
+  // Reference image specific state
+  const [manureWeight, setManureWeight] = useState(487);
   const [lastThreshold, setLastThreshold] = useState(0);
   const [showTokenAlert, setShowTokenAlert] = useState(false);
   const [history, setHistory] = useState<HistoryPoint[]>([]);
+  const [auditLogs, setAuditLogs] = useState<{ id: string, time: string, message: string, type: 'info' | 'success' | 'warning' }[]>([]);
+
+  const addAuditLog = (message: string, type: 'info' | 'success' | 'warning' = 'info') => {
+    setAuditLogs(prev => [{
+      id: Math.random().toString(36).substr(2, 9),
+      time: new Date().toLocaleTimeString(),
+      message,
+      type
+    }, ...prev].slice(0, 10));
+  };
 
   // Simulation Logic
   useEffect(() => {
     const interval = setInterval(() => {
       // Natural decay of manure and production of gas
-      setManureWeight(prev => Math.max(100, prev - 0.5));
+      setManureWeight(prev => {
+        const next = Math.max(100, prev - 0.5);
+        if (prev > 200 && next <= 200) addAuditLog("Critical biomass threshold reached", "warning");
+        return next;
+      });
+
       setGasLevel(prev => {
         const next = prev + (manureWeight > 200 ? 0.2 : -0.1);
-        return Math.min(100, Math.max(0, next));
+        const clamped = Math.min(100, Math.max(0, next));
+        if (prev < 80 && clamped >= 80) addAuditLog("Optimal gas pressure achieved", "success");
+        return clamped;
       });
       
       // Electricity output based on gas level
@@ -1913,6 +2081,7 @@ export default function App() {
       setTokens(prev => prev + 10);
       setLastThreshold(reached);
       setShowTokenAlert(true);
+      addAuditLog(`Milestone reached: ${reached}% capacity. Awarded 10 tokens.`, "success");
       setTimeout(() => setShowTokenAlert(false), 3000);
     } else if (currentLevel < lastThreshold - 10) {
       setLastThreshold(reached);
@@ -1921,9 +2090,11 @@ export default function App() {
 
   const handleFeed = () => {
     setIsFeeding(true);
+    addAuditLog("Manual biomass injection initiated", "info");
     setTimeout(() => {
       setManureWeight(prev => Math.min(1000, prev + 150));
       setIsFeeding(false);
+      addAuditLog("Biomass injection successful (+150kg)", "success");
     }, 1000);
   };
 
@@ -1965,18 +2136,18 @@ export default function App() {
             SOLUTION
           </button>
           <button 
-            onClick={() => setActiveTab('statistics')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'statistics' ? 'bg-zinc-900 text-white' : 'text-zinc-400 hover:text-zinc-600'}`}
-          >
-            <BarChart3 size={14} />
-            STATISTICS
-          </button>
-          <button 
             onClick={() => setActiveTab('cremona')}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'cremona' ? 'bg-zinc-900 text-white' : 'text-zinc-400 hover:text-zinc-600'}`}
           >
             <MapPin size={14} />
             CREMONA
+          </button>
+          <button 
+            onClick={() => setActiveTab('statistics')}
+            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeTab === 'statistics' ? 'bg-zinc-900 text-white' : 'text-zinc-400 hover:text-zinc-600'}`}
+          >
+            <BarChart3 size={14} />
+            STATISTICS
           </button>
           <button 
             onClick={() => setActiveTab('systems')}
@@ -2026,227 +2197,267 @@ export default function App() {
           {activeTab === 'solution' ? (
             <motion.div 
               key="solution"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.1 }}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -30 }}
               className="pb-24 overflow-x-auto"
             >
-              <div className="bg-white rounded-[48px] border border-zinc-200 p-10 shadow-2xl relative min-h-[1000px] w-[1100px] mx-auto overflow-hidden">
-                {/* Background - Ultra-Clean Grid */}
-                <div className="absolute inset-0 opacity-[0.01] pointer-events-none" 
-                     style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '80px 80px' }} />
+              <div className="bg-white rounded-[64px] border border-zinc-200 p-10 shadow-[0_40px_100px_rgba(0,0,0,0.08)] relative min-h-[1700px] w-[1000px] mx-auto overflow-hidden">
+                {/* Background - Ultra-Clean Grid with subtle gradient */}
+                <div className="absolute inset-0 opacity-[0.02] pointer-events-none" 
+                     style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px), linear-gradient(90deg, #000 1px, transparent 1px)', backgroundSize: '50px 50px' }} />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-zinc-50/30 to-transparent pointer-events-none" />
 
-                {/* Header Section */}
-                <div className="flex justify-between items-start mb-16 relative z-50">
-                  <div>
+                {/* Header Section - Editorial Style */}
+                <div className="flex justify-between items-start mb-12 relative z-50">
+                  <div className="max-w-xl">
                     <div className="flex items-center gap-3 mb-3">
-                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
-                      <div className="text-[10px] font-bold text-zinc-400 uppercase tracking-[0.5em]">Ecosystem v13.0</div>
+                      <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-[0_0_20px_rgba(16,185,129,0.8)] animate-pulse" />
+                      <div className="text-[14px] font-black text-zinc-950 uppercase tracking-[0.6em] bg-amber-400 px-4 py-1 rounded-sm shadow-sm">PRESS – INJECT MANURE</div>
                     </div>
-                    <h2 className="text-4xl font-serif italic text-zinc-900">Holistic Circularity</h2>
-                    <p className="text-zinc-500 text-sm mt-3 max-w-md leading-relaxed">
-                      Integrated waste-to-value ecosystem optimized through real-time telemetry and autonomous control.
-                    </p>
                   </div>
-                  <div className="flex flex-col items-end gap-3">
-                    <div className="px-5 py-2 bg-zinc-900 text-white rounded-2xl text-[10px] font-bold uppercase tracking-widest shadow-xl">System Online</div>
-                    <div className="text-[10px] font-mono text-zinc-400">45.13° N | 10.03° E</div>
+                  <div className="flex flex-col items-end gap-2">
+                    <div className="px-4 py-1.5 bg-zinc-950 text-white rounded-lg text-[9px] font-bold uppercase tracking-[0.2em] shadow-lg flex items-center gap-2">
+                      <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse" />
+                      Online
+                    </div>
                   </div>
                 </div>
 
-                {/* --- COMPONENT BENTO GRID (RESIZED & REPOSITIONED) --- */}
+                {/* --- ANNOTATIONS (ULTRA-COMPACT) --- */}
+                <div className="absolute top-[100px] left-[30px] w-[940px] h-[400px] border-[2px] border-red-500/10 rounded-[80px] pointer-events-none z-10 bg-red-500/[0.01]">
+                  <div className="absolute -top-6 right-32 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm border border-red-50/30">
+                    <div className={`w-1 h-1 rounded-full ${tokens > 1000 ? 'bg-emerald-500' : 'bg-amber-500'} animate-pulse`} />
+                    <div className="text-red-500 font-bold text-[9px] uppercase tracking-widest">Economy: <span className="text-zinc-900">{tokens > 1000 ? 'Healthy' : 'Stagnant'}</span></div>
+                  </div>
+                </div>
 
-                {/* ROW 1: INPUT & CONTROL */}
-                <div className="absolute top-[200px] left-[80px] z-40 scale-75 origin-top-left">
-                  <div className="p-8 bg-white rounded-[48px] border border-zinc-100 shadow-xl space-y-6">
-                    <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-widest text-center border-b border-zinc-50 pb-4">Marketplace</div>
-                    <div className="flex flex-col gap-6">
+                <div className="absolute top-[100px] left-[700px] w-[270px] h-[900px] border-[2px] border-red-500/10 rounded-[80px] pointer-events-none z-10 bg-red-500/[0.01]">
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm border border-red-50/50">
+                    <ShieldCheck className="text-indigo-500" size={10} />
+                    <div className="text-red-500 font-bold text-[9px] uppercase tracking-widest whitespace-nowrap">Governance: <span className="text-zinc-900">Active</span></div>
+                  </div>
+                </div>
+
+                <div className="absolute top-[1050px] left-[30px] w-[940px] h-[550px] border-[2px] border-red-500/10 rounded-[80px] pointer-events-none z-10 bg-red-500/[0.01]">
+                  <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/90 backdrop-blur-md px-3 py-1 rounded-full shadow-sm border border-red-50/50">
+                    <TrendingUp className="text-emerald-500" size={10} />
+                    <div className="text-red-500 font-bold text-[9px] uppercase tracking-widest">Revenue: <span className="text-zinc-900">{gridExport > 0 ? 'Generating' : 'Idle'}</span></div>
+                  </div>
+                </div>
+
+                {/* Stakeholder ROI Panel - Ultra-Compact */}
+                <div className="absolute top-[1450px] left-[375px] w-[220px] h-[220px] bg-white rounded-[40px] border border-zinc-100 p-5 shadow-[0_20px_40px_rgba(0,0,0,0.06)] z-40">
+                  <div className="flex items-center justify-between mb-3 border-b border-zinc-50 pb-2">
+                    <div className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">ROI</div>
+                    <Activity size={9} className="text-zinc-300" />
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between text-[8px] font-bold text-zinc-500 mb-1 uppercase tracking-tighter">Farmers</div>
+                      <div className="w-full h-1 bg-zinc-50 rounded-full overflow-hidden">
+                        <motion.div className="h-full bg-amber-500" animate={{ width: `${Math.min(100, (tokens / 2000) * 100)}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-[8px] font-bold text-zinc-500 mb-1 uppercase tracking-tighter">Citizens</div>
+                      <div className="w-full h-1 bg-zinc-50 rounded-full overflow-hidden">
+                        <motion.div className="h-full bg-blue-500" animate={{ width: `${Math.min(100, (electricityOutput / 10) * 100)}%` }} />
+                      </div>
+                    </div>
+                    <div>
+                      <div className="flex justify-between text-[8px] font-bold text-zinc-500 mb-1 uppercase tracking-tighter">Municipality</div>
+                      <div className="w-full h-1 bg-zinc-50 rounded-full overflow-hidden">
+                        <motion.div className="h-full bg-indigo-500" animate={{ width: '85%' }} />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-2 border-t border-zinc-50 flex items-center gap-2">
+                    <div className="w-1 h-1 rounded-full bg-emerald-500" />
+                    <div className="text-[7px] text-zinc-400 font-medium italic">Circularity: 0.82</div>
+                  </div>
+                </div>
+
+                {/* --- COMPONENT BENTO GRID (RESCALED 0.6) --- */}
+
+                {/* TOP ROW */}
+                <div className="absolute top-[180px] left-[50px] z-40 scale-[0.55] origin-top-left">
+                  <div className="p-10 bg-white rounded-[56px] border border-zinc-100 shadow-[0_20px_50px_rgba(0,0,0,0.04)] space-y-8">
+                    <div className="text-[12px] font-bold text-zinc-400 uppercase tracking-[0.3em] text-center border-b border-zinc-50 pb-6">Marketplace</div>
+                    <div className="flex flex-col gap-8">
                       <GroceryShop />
                       <AgriSupply />
                     </div>
                   </div>
                 </div>
 
-                <div className="absolute top-[200px] left-[420px] z-40 scale-75">
+                <div className="absolute top-[180px] left-[375px] z-40 scale-[0.55] origin-top-left">
                   <motion.div 
-                    className="p-8 bg-white rounded-[48px] shadow-2xl border border-zinc-50 flex flex-col items-center gap-6 cursor-pointer hover:border-emerald-200 transition-all"
-                    whileHover={{ y: -8 }}
+                    className="p-12 bg-white rounded-[56px] shadow-[0_40px_80px_rgba(0,0,0,0.06)] border border-zinc-50 flex flex-col items-center gap-10 cursor-pointer group relative overflow-hidden"
+                    whileHover={{ y: -10 }}
                     onClick={handleFeed}
                   >
-                    <div className="p-6 bg-indigo-50 rounded-[32px]">
-                      <Smartphone size={40} className="text-indigo-600" />
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-indigo-600/20" />
+                    <div className="p-10 bg-indigo-50 rounded-[48px] group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 relative">
+                      <Smartphone size={56} strokeWidth={1.5} className="text-indigo-600 group-hover:text-white" />
+                      {isFeeding && (
+                        <motion.div 
+                          className="absolute inset-0 border-4 border-emerald-400 rounded-[48px]"
+                          animate={{ scale: [1, 1.1, 1], opacity: [1, 0, 1] }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        />
+                      )}
                     </div>
                     <div className="text-center">
-                      <div className="text-[14px] font-bold text-zinc-600 uppercase tracking-[0.3em]">Farmer Interface</div>
-                      <div className="text-[12px] text-zinc-400 mt-2 font-medium">Controller</div>
+                      <div className="text-[18px] font-bold text-zinc-800 uppercase tracking-[0.4em]">Farmer Interface</div>
+                      <div className="flex items-center justify-center gap-2 mt-2">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <div className="text-[12px] text-zinc-400 font-bold uppercase tracking-widest">System Controller</div>
+                      </div>
                     </div>
-                    <button className="w-full py-4 bg-zinc-900 hover:bg-emerald-600 text-white rounded-3xl text-[11px] font-bold uppercase tracking-widest transition-all shadow-2xl shadow-zinc-900/10">
-                      {isFeeding ? 'Feeding...' : 'Inject Manure'}
+                    <button className="w-full py-6 bg-zinc-950 hover:bg-emerald-600 text-white rounded-[40px] text-[14px] font-bold uppercase tracking-[0.2em] transition-all shadow-2xl shadow-zinc-900/20 active:scale-95 group-hover:shadow-emerald-500/20">
+                      {isFeeding ? 'Transmitting...' : 'Inject Manure'}
                     </button>
+                    <div className="flex gap-1 mt-2">
+                      {[...Array(12)].map((_, i) => (
+                        <div key={i} className={`w-1 h-1 rounded-full ${i < (tokens / 200) ? 'bg-emerald-500' : 'bg-zinc-100'}`} />
+                      ))}
+                    </div>
                   </motion.div>
                 </div>
 
-                <div className="absolute top-[200px] left-[800px] z-40 scale-75 origin-top-right">
+                <div className="absolute top-[180px] left-[700px] z-40 scale-[0.55] origin-top-left">
                   <DataCentre />
                 </div>
 
-                {/* ROW 2: PROCESSING & CONSUMPTION */}
-                <div className="absolute top-[500px] left-[80px] z-40 scale-75 origin-left">
-                  <div className="p-8 bg-zinc-50/30 rounded-[56px] border border-zinc-100 flex flex-col gap-8 shadow-inner">
-                    <VillageHouse id={1} isActive={electricityOutput > 0} />
-                    <VillageHouse id={2} isActive={electricityOutput > 5} />
-                    <div className="px-6 py-3 bg-white rounded-full border border-zinc-100 flex items-center justify-center gap-4 shadow-sm">
-                      <Users size={18} className="text-emerald-600" />
-                      <span className="text-[12px] font-bold text-zinc-700 uppercase tracking-widest">Eco-Village</span>
+                {/* VERTICAL FLOW */}
+                <div className="absolute top-[550px] left-[375px] z-40 scale-[0.55] origin-top-left flex flex-col items-center gap-16">
+                  <div className="relative p-10 bg-amber-50 rounded-[56px] border border-amber-200 shadow-[0_20px_40px_rgba(0,0,0,0.05)] flex flex-col items-center gap-6">
+                    <div className="absolute -top-5 bg-amber-700 text-white text-[11px] px-6 py-1.5 rounded-full font-bold shadow-lg">BUFFER 01</div>
+                    <div className="p-8 bg-white rounded-[40px] shadow-sm text-amber-700 border border-amber-100">
+                      <Droplets size={56} strokeWidth={1.5} />
                     </div>
+                    <div className="text-[14px] font-bold text-amber-900 uppercase tracking-[0.3em]">Waste Intake</div>
                   </div>
                 </div>
 
-                <div className="absolute top-[500px] left-[420px] z-30 flex items-center gap-10 scale-75">
+                <div className="absolute top-[750px] left-[120px] z-40 scale-[0.55] origin-top-left">
                   <div className="relative">
                     <Digester gasLevel={gasLevel} manureLevel={(manureWeight / 1000) * 100} />
-                    <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 text-[14px] font-bold text-zinc-700 uppercase tracking-[0.4em] whitespace-nowrap bg-white px-6 py-3 rounded-full border border-zinc-100 shadow-md">
+                    <div className="absolute -bottom-14 left-1/2 -translate-x-1/2 text-[16px] font-bold text-zinc-800 uppercase tracking-[0.5em] whitespace-nowrap bg-white/90 backdrop-blur-md px-8 py-4 rounded-full border border-zinc-100 shadow-xl">
                       Biogas Core
                     </div>
                   </div>
-                  <div className="translate-x-4">
-                    <IoTDisplay data={{ gasLevel, manureWeight, electricityOutput, tokens, gridExport }} />
-                  </div>
                 </div>
 
-                <div className="absolute top-[500px] left-[800px] z-40 scale-75 origin-right">
+                <div className="absolute top-[750px] left-[380px] z-40 scale-[0.55] origin-top-left">
+                  <IoTDisplay data={{ gasLevel, manureWeight, electricityOutput, tokens, gridExport }} />
+                </div>
+
+                <div className="absolute top-[550px] left-[700px] z-40 scale-[0.55] origin-top-left">
                   <GovernmentOffice />
                 </div>
 
-                {/* ROW 3: WASTE & GRID */}
-                <div className="absolute top-[800px] left-[120px] z-40 scale-75">
-                  <div className="flex flex-col items-center gap-6 p-8 bg-amber-50/10 rounded-[48px] border border-amber-100/30">
-                    <div className="p-8 bg-amber-900/10 rounded-[40px] border border-amber-900/20 text-amber-900 relative shadow-inner">
-                      <Droplets size={48} />
-                      <div className="absolute -top-4 -right-4 bg-amber-800 text-white text-[11px] px-3 py-1.5 rounded-full font-bold shadow-xl">BUFFER</div>
+                {/* BOTTOM FLOW */}
+                <div className="absolute top-[1150px] left-[50px] z-40 scale-[0.55] origin-top-left flex items-center gap-28">
+                  <div className="p-12 bg-zinc-50/50 rounded-[80px] border border-zinc-100 flex flex-col items-center gap-10 shadow-inner">
+                    <div className="flex flex-col gap-10">
+                      <VillageHouse id={1} isActive={electricityOutput > 0} />
+                      <VillageHouse id={2} isActive={electricityOutput > 5} />
                     </div>
-                    <div className="text-[12px] font-bold text-amber-900/50 uppercase tracking-[0.4em]">Waste Intake</div>
-                  </div>
-                </div>
-
-                <div className="absolute top-[800px] left-[840px] z-40 scale-75">
-                  <div className="flex flex-col items-center gap-6 p-8 bg-blue-50/10 rounded-[48px] border border-blue-100/30">
-                    <div className="p-6 bg-blue-500/10 rounded-[40px] border border-blue-200 text-blue-600 shadow-sm">
-                      <Zap size={40} />
-                    </div>
-                    <div className="px-8 py-3 bg-blue-600 text-white rounded-full text-[12px] font-bold uppercase tracking-widest shadow-2xl shadow-blue-600/20">
-                      National Grid
+                    <div className="px-10 py-4 bg-white rounded-full border border-zinc-100 flex items-center justify-center gap-5 shadow-[0_10px_30px_rgba(0,0,0,0.05)]">
+                      <div className="p-2 bg-emerald-50 rounded-lg"><Users size={24} className="text-emerald-600" /></div>
+                      <span className="text-[16px] font-bold text-zinc-800 uppercase tracking-[0.3em]">Eco-Village</span>
                     </div>
                   </div>
                 </div>
 
-                {/* --- CONNECTIVITY FLOWS (RECALCULATED PATHS) --- */}
+                <div className="absolute top-[1220px] left-[420px] z-40 scale-[0.5] origin-top-left">
+                  <div className="relative flex flex-col items-center gap-8">
+                    <div className="p-10 bg-blue-50 rounded-[64px] border border-blue-100 flex flex-col items-center gap-8 shadow-[0_30px_60px_rgba(0,0,0,0.05)] group">
+                      <div className="p-8 bg-white rounded-[40px] shadow-sm text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                        <Zap size={56} strokeWidth={1.5} />
+                      </div>
+                      <button className="px-12 py-5 bg-blue-600 text-white rounded-full text-[14px] font-bold uppercase tracking-[0.3em] shadow-2xl shadow-blue-600/30 hover:bg-blue-700 transition-all">
+                        National Grid
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* --- CONNECTIVITY FLOWS (ENGINEERING-GRADE PRECISION) --- */}
                 
-                {/* 1. Farmer -> Digester (Down) */}
-                <SystemFlowConnector 
-                  from={{ x: 550, y: 350 }} 
-                  to={{ x: 550, y: 500 }} 
-                  label="Manure Feed" 
-                  color="amber" 
-                />
+                {/* Farmer -> Waste Intake (Manure) */}
+                <SystemFlowConnector from={{ x: 463, y: 400 }} to={{ x: 463, y: 550 }} label="Manure" color="amber" isActive={isFeeding || manureWeight > 100} />
 
-                {/* 2. Digester -> Community (Left) */}
-                <SystemFlowConnector 
-                  from={{ x: 450, y: 580 }} 
-                  to={{ x: 250, y: 580 }} 
-                  label="Electricity" 
-                  color="amber" 
-                />
+                {/* Waste Intake -> Biogas Core (Biomass) */}
+                <SystemFlowConnector from={{ x: 463, y: 660 }} to={{ x: 208, y: 750 }} label="Biomass" color="amber" isActive={manureWeight > 200} />
 
-                {/* 3. Community -> Waste Intake (Down) */}
-                <SystemFlowConnector 
-                  from={{ x: 180, y: 700 }} 
-                  to={{ x: 180, y: 800 }} 
-                  label="Waste" 
-                  color="zinc" 
-                  duration={4}
-                />
+                {/* Biogas Core -> Eco-Village (Clean Electricity) */}
+                <SystemFlowConnector from={{ x: 164, y: 890 }} to={{ x: 164, y: 1176 }} label="Clean Electricity" color="amber" isActive={electricityOutput > 0} />
 
-                {/* 4. Waste Intake -> Digester (Diagonal Up-Right) */}
-                <SystemFlowConnector 
-                  from={{ x: 250, y: 850 }} 
-                  to={{ x: 480, y: 650 }} 
-                  label="Manure" 
-                  color="amber" 
-                  duration={3.5}
-                />
+                {/* Eco-Village -> National Grid (Surplus Electricity) */}
+                <SystemFlowConnector from={{ x: 314, y: 1280 }} to={{ x: 420, y: 1280 }} label="Surplus Electricity" color="amber" isActive={gridExport > 0} zIndex={100} isEnhanced={true} />
 
-                {/* 5. Digester -> IoT (Right) */}
-                <SystemFlowConnector 
-                  from={{ x: 650, y: 580 }} 
-                  to={{ x: 720, y: 580 }} 
-                  label="Data" 
-                  color="blue" 
-                />
+                {/* National Grid -> Eco-Village (Revenue) */}
+                <SystemFlowConnector from={{ x: 420, y: 1320 }} to={{ x: 314, y: 1320 }} label="Revenue" color="emerald" isActive={gridExport > 0} zIndex={100} isEnhanced={true} />
 
-                {/* 6. IoT -> Data Centre (Diagonal Up-Right) */}
-                <SystemFlowConnector 
-                  from={{ x: 800, y: 550 }} 
-                  to={{ x: 920, y: 350 }} 
-                  label="Stream" 
-                  color="blue" 
-                />
+                {/* IoT -> Data Centre (Telemetry) */}
+                <SystemFlowConnector from={{ x: 512, y: 890 }} to={{ x: 762, y: 301 }} label="Telemetry" color="blue" isActive={true} />
 
-                {/* 7. Data Centre -> Gov Office (Down) */}
-                <SystemFlowConnector 
-                  from={{ x: 950, y: 350 }} 
-                  to={{ x: 950, y: 500 }} 
-                  label="Insights" 
-                  color="indigo" 
-                />
+                {/* Data Centre -> Gov Office (Insights) */}
+                <SystemFlowConnector from={{ x: 762, y: 301 }} to={{ x: 762, y: 550 }} label="Insights" color="indigo" isActive={true} />
 
-                {/* 8. Gov Office -> National Grid (Down) */}
-                <SystemFlowConnector 
-                  from={{ x: 950, y: 700 }} 
-                  to={{ x: 950, y: 800 }} 
-                  label="Export" 
-                  color="amber" 
-                />
+                {/* Data Centre -> Farmer (Eco-Tokens) */}
+                <SystemFlowConnector from={{ x: 700, y: 240 }} to={{ x: 551, y: 240 }} label="Eco-Tokens" color="emerald" isActive={showTokenAlert || tokens > 0} />
 
-                {/* 9. Data Centre -> Farmer (Left) */}
-                <SystemFlowConnector 
-                  from={{ x: 850, y: 250 }} 
-                  to={{ x: 650, y: 250 }} 
-                  label="Tokens" 
-                  color="emerald" 
-                  duration={2}
-                />
+                {/* Farmer <-> Marketplace */}
+                <SystemFlowConnector from={{ x: 375, y: 240 }} to={{ x: 226, y: 240 }} label="Spend" color="emerald" isActive={tokens > 0} />
+                <SystemFlowConnector from={{ x: 226, y: 340 }} to={{ x: 375, y: 340 }} label="Supplies" color="emerald" isActive={tokens > 0} />
 
-                {/* 10. Farmer -> Marketplace (Left) */}
-                <SystemFlowConnector 
-                  from={{ x: 450, y: 250 }} 
-                  to={{ x: 250, y: 250 }} 
-                  label="Spend" 
-                  color="emerald" 
-                />
-
-                {/* 11. Marketplace -> Farmer (Diagonal Down-Right) */}
-                <SystemFlowConnector 
-                  from={{ x: 200, y: 350 }} 
-                  to={{ x: 450, y: 350 }} 
-                  label="Supplies" 
-                  color="emerald" 
-                  duration={3}
-                />
-
-                {/* Legend / Key - Centered Bottom */}
-                <div className="absolute bottom-10 left-1/2 -translate-x-1/2 bg-white/95 backdrop-blur-xl p-6 rounded-[32px] border border-zinc-100 flex gap-16 z-50 shadow-xl">
-                  <div className="flex items-center gap-4">
-                    <div className="w-4 h-4 rounded-full bg-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.4)]" />
-                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Energy</span>
+                {/* Audit Log Panel - Compact Dark */}
+                <div className="absolute top-[1150px] left-[650px] w-[300px] h-[380px] bg-zinc-950 rounded-[40px] border border-white/10 p-6 shadow-[0_40px_80px_rgba(0,0,0,0.4)] z-50 overflow-hidden">
+                  <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-3">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="text-emerald-400" size={16} />
+                      <h3 className="text-[9px] font-bold text-white uppercase tracking-[0.2em]">Audit Trail</h3>
+                    </div>
+                    <div className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_12px_rgba(59,130,246,0.4)]" />
-                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Data</span>
+                  <div className="space-y-3">
+                    {auditLogs.slice(0, 7).map(log => (
+                      <motion.div 
+                        key={log.id}
+                        initial={{ x: 10, opacity: 0 }}
+                        animate={{ x: 0, opacity: 1 }}
+                        className="flex gap-2 items-start group"
+                      >
+                        <div className="text-[7px] font-mono text-zinc-600 mt-0.5">{log.time}</div>
+                        <div className={`text-[9px] font-medium leading-tight ${
+                          log.type === 'success' ? 'text-emerald-400' : 
+                          log.type === 'warning' ? 'text-amber-400' : 'text-zinc-400'
+                        }`}>
+                          {log.message}
+                        </div>
+                      </motion.div>
+                    ))}
                   </div>
-                  <div className="flex items-center gap-4">
-                    <div className="w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]" />
-                    <span className="text-[10px] font-bold text-zinc-600 uppercase tracking-widest">Tokens</span>
+                  <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-zinc-950 to-transparent pointer-events-none" />
+                </div>
+
+                {/* Legend / Key - Compact */}
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-xl px-6 py-3 rounded-full border border-zinc-100 flex gap-10 z-50 shadow-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]" />
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Energy</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.4)]" />
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Data</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]" />
+                    <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest">Value</span>
                   </div>
                 </div>
               </div>
