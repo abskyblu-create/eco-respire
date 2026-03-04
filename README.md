@@ -46,15 +46,11 @@ The system addresses the air-pollution crisis in Cremona, Italy, where livestock
                       │
         ┌─────────────┴─────────────┐
         ▼                           ▼
-┌───────────────┐           ┌──────────────────┐
-
-│ Local Homes   │           │ National Grid    │
-
-│ Renewable     │           │ Energy Export    │
-
-│ Electricity   │           │ Revenue Stream   │
-
-└───────────────┘           └──────────────────┘
+┌───────────────┐            ┌──────────────────┐
+│ Local Homes   │      &     │ National Grid    │
+│ Renewable     │      &     │ Energy Export    │
+│ Electricity   │      &     │ Revenue Stream   │
+└───────────────┘      &     └──────────────────┘
 
                       │
                       ▼
