@@ -39,6 +39,11 @@ The system addresses the air-pollution crisis in Cremona, Italy, where livestock
             └─────────┬───────────┘
                       │
                       ▼
+
+
+
+
+                      
             ┌─────────────────────┐
             │ Electricity Generator│
             │  (Renewable Energy) │
